@@ -76,7 +76,7 @@ export async function waitForBackend({
 export async function authenticateRequest(path, values, options) {
   await waitForBackend(options);
   throwIfCancelled(options?.signal);
-  return api.post(path, values, { timeout: 30000, signal: options?.signal });
+  return api.post(path, values, { timeout: 60000, signal: options?.signal });
 }
 
 api.interceptors.request.use((config) => {
