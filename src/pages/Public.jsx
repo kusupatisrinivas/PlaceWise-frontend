@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -271,6 +271,9 @@ export function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [connectionMessage, setConnectionMessage] = useState("");
+  const requestRef = useRef(null);
+  useEffect(() => () => requestRef.current?.abort(), []);
   const navigate = useNavigate();
   const location = useLocation();
   const officer =
@@ -282,15 +285,25 @@ export function Login() {
     await signIn(form);
   }
   async function signIn(credentials) {
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
     setError("");
     setBusy(true);
     try {
-      await authenticate("/auth/login", credentials);
-      navigate(location.state?.from || "/dashboard", { replace: true });
+      await authenticate("/auth/login", credentials, {
+        signal: controller.signal,
+        onWaiting: setConnectionMessage,
+      });
+      if (!controller.signal.aborted)
+        navigate(location.state?.from || "/dashboard", { replace: true });
     } catch (e) {
-      setError(errorMessage(e));
+      if (!controller.signal.aborted) setError(errorMessage(e));
     } finally {
-      setBusy(false);
+      if (!controller.signal.aborted) {
+        setBusy(false);
+        setConnectionMessage("");
+      }
     }
   }
   return (
@@ -304,6 +317,11 @@ export function Login() {
       </p>
       <form onSubmit={submit}>
         <FormError error={error} />
+        {busy && connectionMessage && (
+          <p className="auth-subtitle" role="status">
+            {connectionMessage}
+          </p>
+        )}
         <Field label="Email address">
           <input
             type="email"
@@ -381,23 +399,36 @@ export function Register() {
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [connectionMessage, setConnectionMessage] = useState("");
+  const requestRef = useRef(null);
+  useEffect(() => () => requestRef.current?.abort(), []);
   if (user) return <Navigate to="/dashboard" replace />;
   const change = (key) => (e) => setForm({ ...form, [key]: e.target.value });
   async function submit(event) {
     event.preventDefault();
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
     setBusy(true);
     setError("");
     try {
-      await authenticate("/auth/register", {
-        ...form,
-        year: Number(form.year),
-        cgpa: Number(form.cgpa),
-      });
-      navigate("/dashboard");
+      await authenticate(
+        "/auth/register",
+        {
+          ...form,
+          year: Number(form.year),
+          cgpa: Number(form.cgpa),
+        },
+        { onWaiting: setConnectionMessage, signal: controller.signal },
+      );
+      if (!controller.signal.aborted) navigate("/dashboard");
     } catch (e) {
-      setError(errorMessage(e));
+      if (!controller.signal.aborted) setError(errorMessage(e));
     } finally {
-      setBusy(false);
+      if (!controller.signal.aborted) {
+        setBusy(false);
+        setConnectionMessage("");
+      }
     }
   }
   return (
@@ -409,6 +440,11 @@ export function Register() {
       </p>
       <form onSubmit={submit}>
         <FormError error={error} />
+        {busy && connectionMessage && (
+          <p className="auth-subtitle" role="status">
+            {connectionMessage}
+          </p>
+        )}
         <div className="form-grid">
           <Field label="Full name" className="span-2">
             <input

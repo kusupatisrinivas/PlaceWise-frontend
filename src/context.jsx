@@ -5,7 +5,7 @@ import {
   useState,
   useCallback,
 } from "react";
-import { api, setAccessToken, errorMessage } from "./api";
+import { api, authenticateRequest, setAccessToken, errorMessage } from "./api";
 import { CheckCircle2, AlertCircle, X } from "lucide-react";
 
 const AuthContext = createContext(null);
@@ -46,8 +46,9 @@ export function Providers({ children }) {
     );
     return () => clearTimeout(timer);
   }, [user, logout, notify]);
-  async function authenticate(path, values) {
-    const { data } = await api.post(path, values);
+  async function authenticate(path, values, options) {
+    const { data } = await authenticateRequest(path, values, options);
+    options?.signal?.throwIfAborted();
     setAccessToken(data.token);
     const { token, ...profile } = data;
     setUser(profile);
