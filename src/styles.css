@@ -1756,14 +1756,10 @@ tbody tr:hover {
   padding: 0;
   display: flex;
 }
-.skill-input input {
+.skill-input select {
   border: none;
   font-size: 11px;
   padding: 12px 0 2px;
-  outline: none;
-}
-.skill-input input:focus {
-  outline: none;
 }
 .profile-grid {
   display: grid;

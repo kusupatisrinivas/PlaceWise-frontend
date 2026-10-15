@@ -50,8 +50,7 @@ test("student registers, updates skills, applies, and receives an admin selectio
     studentId = students[0].id;
     await page.getByRole("link", { name: "My profile", exact: true }).click();
     for (const skill of ["java", "sql"]) {
-      await page.getByLabel("Add a skill").fill(skill);
-      await page.getByLabel("Add a skill").press("Enter");
+      await page.getByLabel("Add a skill").selectOption(skill);
     }
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByText("Your profile is up to date.")).toBeVisible();

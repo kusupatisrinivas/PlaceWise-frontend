@@ -26,6 +26,46 @@ export const branches = [
   "AIML",
   "AIDS",
 ];
+const skillOptions = [
+  "Java",
+  "Python",
+  "C",
+  "C++",
+  "C#",
+  "JavaScript",
+  "TypeScript",
+  "SQL",
+  "HTML",
+  "CSS",
+  "React",
+  "Angular",
+  "Vue.js",
+  "Node.js",
+  "Express.js",
+  "Spring Boot",
+  "Django",
+  "Flask",
+  ".NET",
+  "MySQL",
+  "PostgreSQL",
+  "MongoDB",
+  "Git",
+  "Linux",
+  "Docker",
+  "AWS",
+  "Azure",
+  "Data Structures",
+  "Algorithms",
+  "Machine Learning",
+  "Data Analysis",
+  "Excel",
+  "Power BI",
+  "Tableau",
+  "Testing",
+  "Communication",
+  "Problem Solving",
+  "Teamwork",
+];
 export const statuses = [
   "APPLIED",
   "SHORTLISTED",
@@ -472,26 +512,29 @@ export function SkillInput({ values, onChange }) {
           </span>
         ))}
       </div>
-      <input
+      <select
         aria-label="Add a skill"
-        maxLength={50}
-        placeholder="Type a skill and press Enter"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === ",") {
-            e.preventDefault();
-            const value = e.currentTarget.value.trim().toLowerCase();
-            if (value && !values.includes(value) && values.length < 30)
-              onChange([...values, value]);
-            e.currentTarget.value = "";
-          }
-        }}
-        onBlur={(e) => {
-          const value = e.target.value.trim().toLowerCase();
+        value=""
+        disabled={values.length >= 30}
+        onChange={(e) => {
+          const value = e.target.value;
           if (value && !values.includes(value) && values.length < 30)
             onChange([...values, value]);
-          e.target.value = "";
         }}
-      />
+      >
+        <option value="" disabled>
+          Select a skill
+        </option>
+        {skillOptions.map((skill) => (
+          <option
+            key={skill}
+            value={skill.toLowerCase()}
+            disabled={values.includes(skill.toLowerCase())}
+          >
+            {skill}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
